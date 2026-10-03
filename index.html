@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAIZ SOOQ - Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --ledi-blue: #1E3A8A;
+            --ledi-light: #E0F2FE;
+            --bebi-lavender: #7C3AED;
+            --bebi-light: #EDE9FE;
+            --bg-color: #F8FAFC;
+            --text-color: #1E293B;
+            --white: #FFFFFF;
+            --gray-light: #F1F5F9;
+            --danger: #EF4444;
+            --success: #10B981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 430px;
+            height: 900px;
+            background: var(--white);
+            border-radius: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 10px solid #1e293b;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 40px;
+            background: var(--ledi-blue);
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--ledi-blue), var(--bebi-lavender));
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .app-header h1 {
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+
+        .app-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Navigation Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--white);
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            color: var(--bebi-lavender);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            margin-bottom: 2px;
+        }
+
+        /* Cards & Dashboards */
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-light);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: var(--gray-light);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card.ledi {
+            background: var(--ledi-light);
+            color: var(--ledi-blue);
+        }
+
+        .stat-card.bebi {
+            background: var(--bebi-light);
+            color: var(--bebi-lavender);
+        }
+
+        .stat-card h3 {
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--bebi-lavender);
+            color: var(--white);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .btn-ledi {
+            background: var(--ledi-blue);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Forms & Inputs */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 12px 0;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        /* Lists & Items */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--gray-light);
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .badge-ledi { background: var(--ledi-light); color: var(--ledi-blue); }
+        .badge-bebi { background: var(--bebi-light); color: var(--bebi-lavender); }
+
+        .clickable {
+            cursor: pointer;
+            color: var(--ledi-blue);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <span>9:41</span>
+        <span>KAIZ SOOQ</span>
+        <span>📶 🔋</span>
+    </div>
+
+    <!-- Header -->
+    <div class="app-header">
+        <h1>K A I Z  S O O Q</h1>
+        <p>LEDI (Blue) & BEBI (Lavender) Platform</p>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+
+        <!-- 1. DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="card">
+                <h3 style="margin-bottom: 10px;">📊 ഓവർവ്യൂ ഡാഷ്‌ബോർഡ്</h3>
+                <div class="grid-2" style="margin-bottom: 10px;">
+                    <div class="stat-card">
+                        <h3>ടോട്ടൽ റെവന്യൂ</h3>
+                        <p id="dash-total-rev">₹0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>ടോട്ടൽ പ്രോഫിറ്റ്</h3>
+                        <p id="dash-total-prof">₹0</p>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="stat-card ledi">
+                        <h3>LEDI (Blue) Rev / Prof</h3>
+                        <p id="dash-ledi-stats">₹0 / ₹0</p>
+                    </div>
+                    <div class="stat-card bebi">
+                        <h3>BEBI (Lavender) Rev / Prof</h3>
+                        <p id="dash-bebi-stats">₹0 / ₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>👑 ഓണർ ഏണിംഗ്സ്</h3>
+                <p style="font-size: 20px; font-weight: bold; color: var(--bebi-lavender); margin: 5px 0;" id="dash-owner-earn">₹0</p>
+                <p style="font-size: 12px; color: #64748B;" id="dash-owner-orders">ആകെ ലഭിച്ച ഓർഡറുകൾ: 0</p>
+            </div>
+
+            <div class="card">
+                <h3>📦 ഓർഡർ സ്റ്റാറ്റസ്</h3>
+                <div class="grid-2" style="margin-top: 10px;">
+                    <div class="stat-card">
+                        <h3>കംപ്ലീറ്റഡ്</h3>
+                        <p id="dash-comp-orders">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>പെൻഡിംഗ്</h3>
+                        <p id="dash-pend-orders">0</p>
+                    </div>
+                </div>
+                <div style="font-size: 12px; margin-top: 10px; color: #475569;">
+                    LEDI Completed/Pending: <span id="dash-ledi-ord">0 / 0</span><br>
+                    BEBI Completed/Pending: <span id="dash-bebi-ord">0 / 0</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🚨 അടുത്ത ഡെലിവറികൾ</h3>
+                <div id="next-deliveries-list" style="margin-top: 10px; font-size: 13px;">
+                    <p style="color: #64748B;">ഡെലിവറികൾ ഒന്നും ബാക്കിയില്ല.</p>
+                </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-ledi" onclick="switchTab('customers')">➕ ആഡ് കസ്റ്റമർ</button>
+                <button class="btn" onclick="switchTab('store')">👗 ഐറ്റം സ്റ്റോർ</button>
+                <button class="btn" style="background: #059669;" onclick="switchTab('employees')">👥 ആഡ് എംപ്ലോയി</button>
+            </div>
+        </div>
+
+        <!-- 2. ITEM STORE TAB -->
+        <div id="tab-store" class="tab-content">
+            <div class="card">
+                <h3>👗 ഐറ്റം സ്റ്റോർ (ഡ്രസ്സുകൾ ആഡ് ചെയ്യുക)</h3>
+                <form id="store-form" onsubmit="saveItem(event)">
+                    <input type="hidden" id="item-edit-id">
+                    <label>ഡ്രസ്സ് നെയിം</label>
+                    <input type="text" id="item-name" required>
+                    <label>ഐറ്റം കോഡ് (Code)</label>
+                    <input type="text" id="item-code" required>
+                    <label>പ്രായ്‌സ് (Price - ₹)</label>
+                    <input type="number" id="item-price" required>
+                    <label>പ്ലാറ്റ്‌ഫോം</label>
+                    <select id="item-platform">
+                        <option value="LEDI">LEDI (Blue)</option>
+                        <option value="BEBI">BEBI (Lavender)</option>
+                    </select>
+                    <label>ചിത്രം (ഇമേജ് അപ്‌ലോഡ് - Max 10MB)</label>
+                    <input type="file" id="item-image" accept="image/*">
+                    <button type="submit" class="btn">ഐറ്റം സേവ് ചെയ്യുക</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>സ്റ്റോറിലുള്ള ഐറ്റങ്ങൾ</h3>
+                <div id="store-items-list"></div>
+            </div>
+        </div>
+
+        <!-- 3. EMPLOYEES TAB -->
+        <div id="tab-employees" class="tab-content">
+            <div class="card">
+                <h3>👥 എംപ്ലോയി മാനേജ്മെന്റ്</h3>
+                <form id="employee-form" onsubmit="saveEmployee(event)">
+                    <input type="hidden" id="emp-edit-id">
+                    <label>എംപ്ലോയിയുടെ പേര്</label>
+                    <input type="text" id="emp-name" required>
+                    <button type="submit" class="btn" style="background: #059669;">എംപ്ലോയിയെ ചേർക്കുക</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>എംപ്ലോയി ലിസ്റ്റ് & പെർഫോമൻസ്</h3>
+                <div id="employee-list-container"></div>
+            </div>
+        </div>
+
+        <!-- 4. CUSTOMERS & ORDERS TAB -->
+        <div id="tab-customers" class="tab-content">
+            <div class="card">
+                <h3>📝 പുതിയ കസ്റ്റമർ & ഓർഡർ</h3>
+                <form id="order-form" onsubmit="saveOrder(event)">
+                    <input type="hidden" id="order-edit-id">
+                    <label>കസ്റ്റമറുടെ പേര്</label>
+                    <input type="text" id="cust-name" required>
+                    <label>വാട്സാപ്പ് നമ്പർ</label>
+                    <input type="text" id="cust-whatsapp" required>
+                    <label>അഡ്രസ്സ്</label>
+                    <textarea id="cust-address" rows="2" required></textarea>
+                    
+                    <div class="grid-2">
+                        <div>
+                            <label>പ്ലാറ്റ്‌ഫോം</label>
+                            <select id="cust-platform">
+                                <option value="LEDI">LEDI (Blue)</option>
+                                <option value="BEBI">BEBI (Lavender)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>ഡെലിവറി തീയതി</label>
+                            <input type="date" id="cust-delivery-date" required>
+                        </div>
+                    </div>
+
+                    <label>ഐറ്റം കോഡ് (Item Store ൽ നിന്നുള്ള കോഡ്)</label>
+                    <select id="cust-item-code" onchange="autofillItemDetails()">
+                        <option value="">ഐറ്റം തിരഞ്ഞെടുക്കുക</option>
+                    </select>
+
+                    <label>ഡ്രസ്സിന്റെ പേര്</label>
+                    <input type="text" id="cust-dress-name" required>
+
+                    <div class="grid-2">
+                        <div>
+                            <label>നിശ്ചയിച്ച പ്രൈസ് (₹)</label>
+                            <input type="number" id="cust-price" oninput="calculateFinances()" required>
+                        </div>
+                        <div>
+                            <label>അഡ്വാൻസ് എമൗണ്ട് (₹)</label>
+                            <input type="number" id="cust-advance" oninput="calculateFinances()" required>
+                            <small id="advance-hint" style="color: #059669; font-size: 11px;"></small>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <label>മെറ്റീരിയൽ കോസ്റ്റ് (₹)</label>
+                            <input type="number" id="cust-mat-cost" value="0" oninput="calculateFinances()" required>
+                        </div>
+                        <div>
+                            <label>ഡെലിവറി ചാർജ് (₹)</label>
+                            <input type="number" id="cust-del-charge" value="0" oninput="calculateFinances()" required>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <label>വർക്ക് ചെയ്യുന്ന എംപ്ലോയി</label>
+                            <select id="cust-employee" required></select>
+                        </div>
+                        <div>
+                            <label>സ്റ്റിച്ചിംഗ് ചാർജ് (₹)</label>
+                            <input type="number" id="cust-stitch-charge" value="0" oninput="calculateFinances()" required>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--gray-light); padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 13px;">
+                        <b>ഓട്ടോ കാൽക്കുലേഷൻ:</b><br>
+                        ഓണർ ഷെയർ: <span id="calc-owner-share">₹0</span> | ബിസിനസ് പ്രോഫിറ്റ്: <span id="calc-biz-profit">₹0</span>
+                    </div>
+
+                    <label>മെഷർമെന്റ് (Standard / Manual)</label>
+                    <textarea id="cust-measurement" placeholder="Standard അല്ലെങ്കിൽ അളവുകൾ ഇവിടെ എഴുതുക..." rows="2" required></textarea>
+
+                    <button type="submit" class="btn btn-ledi">ഓഡർ സേവ് ചെയ്യുക</button>
+                </form>
+            </div>
+
+            <!-- Window Selector for Orders -->
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <button class="btn" style="flex: 1; padding: 6px;" onclick="switchOrderView('pending')">പെൻഡിംഗ് ഓർഡറുകൾ</button>
+                <button class="btn" style="flex: 1; padding: 6px; background: #059669;" onclick="switchOrderView('completed')">കംപ്ലീറ്റഡ് ഓർഡറുകൾ</button>
+            </div>
+
+            <div class="card" id="orders-container-view">
+                <h3 id="order-view-title">പെൻഡിംഗ് ഓർഡറുകൾ</h3>
+                <div id="orders-list"></div>
+            </div>
+        </div>
+
+        <!-- 5. DATA ANALYSIS TAB -->
+        <div id="tab-analytics" class="tab-content">
+            <div class="card">
+                <h3>📈 ഡാറ്റ അനാലിസിസ് & സ്റ്റാറ്റസ്</h3>
+                <label>ആരംഭ തീയതി</label>
+                <input type="date" id="filter-start-date" onchange="updateAnalytics()">
+                <label>അവസാന തീയതി</label>
+                <input type="date" id="filter-end-date" onchange="updateAnalytics()">
+                
+                <div style="width: 100%; height: 250px; margin-top: 15px;">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('dashboard')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+        </div>
+        <div class="nav-item" onclick="switchTab('store')">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/></svg>
+            Store
+        </div>
+        <div class="nav-item" onclick="switchTab('employees')">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            Employees
+        </div>
+        <div class="nav-item" onclick="switchTab('customers')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+            Orders
+        </div>
+        <div class="nav-item" onclick="switchTab('analytics')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            Analytics
+        </div>
+    </div>
+</div>
+
+<script>
+    // Data Storage initialization
+    let db = {
+        items: JSON.parse(localStorage.getItem('kaiz_items')) || [],
+        employees: JSON.parse(localStorage.getItem('kaiz_employees')) || [
+            { id: '1', name: 'Anu' },
+            { id: '2', name: 'Umma' },
+            { id: '3', name: 'Nusrath' }
+        ],
+        orders: JSON.parse(localStorage.getItem('kaiz_orders')) || []
+    };
+
+    let currentOrderView = 'pending';
+    let analyticsChartInstance = null;
+
+    function saveData() {
+        localStorage.setItem('kaiz_items', JSON.stringify(db.items));
+        localStorage.setItem('kaiz_employees', JSON.stringify(db.employees));
+        localStorage.setItem('kaiz_orders', JSON.stringify(db.orders));
+        updateDashboard();
+        renderStore();
+        renderEmployees();
+        renderOrders();
+        populateDropdowns();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabId).classList.add('active');
+        
+        // Find respective nav item
+        const navIndex = ['dashboard', 'store', 'employees', 'customers', 'analytics'].indexOf(tabId);
+        if(navIndex >= 0) {
+            document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
+        }
+        if(tabId === 'analytics') initChart();
+    }
+
+    // --- ITEM STORE LOGIC ---
+    function saveItem(e) {
+        e.preventDefault();
+        const id = document.getElementById('item-edit-id').value || Date.now().toString();
+        const name = document.getElementById('item-name').value;
+        const code = document.getElementById('item-code').value;
+        const price = parseFloat(document.getElementById('item-price').value);
+        const platform = document.getElementById('item-platform').value;
+        
+        const imageInput = document.getElementById('item-image');
+        let imageUrl = '';
+        if (imageInput.files && imageInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                finishItemSave(id, name, code, price, platform, e.target.result);
+            };
+            reader.readAsDataURL(imageInput.files[0]);
+        } else {
+            const existing = db.items.find(i => i.id === id);
+            imageUrl = existing ? existing.image : '';
+            finishItemSave(id, name, code, price, platform, imageUrl);
+        }
+    }
+
+    function finishItemSave(id, name, code, price, platform, image) {
+        const index = db.items.findIndex(i => i.id === id);
+        if (index >= 0) {
+            db.items[index] = { id, name, code, price, platform, image };
+        } else {
+            db.items.push({ id, name, code, price, platform, image });
+        }
+        document.getElementById('store-form').reset();
+        document.getElementById('item-edit-id').value = '';
+        saveData();
+    }
+
+    function renderStore() {
+        const container = document.getElementById('store-items-list');
+        container.innerHTML = db.items.length ? '' : '<p style="font-size:13px; color:#64748B;">സ്റ്റോറിൽ ഐറ്റങ്ങൾ ഒന്നും ഇല്ല.</p>';
+        db.items.forEach(item => {
+            container.innerHTML += `
+                <div class="list-item">
+                    <div>
+                        <b>${item.name}</b> (${item.code}) - ₹${item.price}<br>
+                        <span class="badge badge-${item.platform.toLowerCase()}">${item.platform}</span>
+                    </div>
+                    <div>
+                        <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="editItem('${item.id}')">Edit</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteItem('${item.id}')">Del</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function editItem(id) {
+        const item = db.items.find(i => i.id === id);
+        if(!item) return;
+        document.getElementById('item-edit-id').value = item.id;
+        document.getElementById('item-name').value = item.name;
+        document.getElementById('item-code').value = item.code;
+        document.getElementById('item-price').value = item.price;
+        document.getElementById('item-platform').value = item.platform;
+    }
+
+    function deleteItem(id) {
+        db.items = db.items.filter(i => i.id !== id);
+        saveData();
+    }
+
+    // --- EMPLOYEE LOGIC ---
+    function saveEmployee(e) {
+        e.preventDefault();
+        const id = document.getElementById('emp-edit-id').value || Date.now().toString();
+        const name = document.getElementById('emp-name').value;
+        const index = db.employees.findIndex(emp => emp.id === id);
+        if(index >= 0) {
+            db.employees[index].name = name;
+        } else {
+            db.employees.push({ id, name });
+        }
+        document.getElementById('employee-form').reset();
+        document.getElementById('emp-edit-id').value = '';
+        saveData();
+    }
+
+    function renderEmployees() {
+        const container = document.getElementById('employee-list-container');
+        container.innerHTML = '';
+        db.employees.forEach(emp => {
+            const empOrders = db.orders.filter(o => o.employee === emp.name);
+            const earned = empOrders.reduce((sum, o) => sum + parseFloat(o.stitchCharge || 0), 0);
+            const completedCount = empOrders.filter(o => o.status === 'completed').length;
+            const pendingCount = empOrders.filter(o => o.status === 'pending').length;
+
+            container.innerHTML += `
+                <div class="card" style="background: var(--gray-light); margin-bottom: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b>${emp.name}</b>
+                        <div>
+                            <button class="btn" style="padding: 2px 6px; font-size:10px;" onclick="editEmp('${emp.id}')">Edit</button>
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size:10px;" onclick="deleteEmp('${emp.id}')">Del</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 12px; margin-top: 5px;">സമ്പാദ്യം (Stitching Earned): <b>₹${earned}</b></p>
+                    <p style="font-size: 12px;">കംപ്ലീറ്റഡ്: ${completedCount} | പെൻഡിംഗ്: ${pendingCount}</p>
+                    <div style="margin-top: 5px; font-size: 11px;">
+                        <u>പെൻഡിംഗ് വർക്കുകൾ:</u>
+                        ${empOrders.filter(o => o.status === 'pending').map(o => `<br>• ${o.custName} (${o.dressName}) - ഡെലിവറി: ${o.deliveryDate} - അളവ്: ${o.measurement}`).join('') || '<br>ഇല്ല'}
+                    </div>
+                </div>`;
+        });
+    }
+
+    function editEmp(id) {
+        const emp = db.employees.find(e => e.id === id);
+        if(!emp) return;
+        document.getElementById('emp-edit-id').value = emp.id;
+        document.getElementById('emp-name').value = emp.name;
+    }
+
+    function deleteEmp(id) {
+        db.employees = db.employees.filter(e => e.id !== id);
+        saveData();
+    }
+
+    // --- ORDERS & CALCULATIONS ---
+    function autofillItemDetails() {
+        const code = document.getElementById('cust-item-code').value;
+        const item = db.items.find(i => i.code === code);
+        if(item) {
+            document.getElementById('cust-dress-name').value = item.name;
+            document.getElementById('cust-price').value = item.price;
+            document.getElementById('cust-platform').value = item.platform;
+            calculateFinances();
+        }
+    }
+
+    function calculateFinances() {
+        const price = parseFloat(document.getElementById('cust-price').value) || 0;
+        const advance = parseFloat(document.getElementById('cust-advance').value) || 0;
+        const matCost = parseFloat(document.getElementById('cust-mat-cost').value) || 0;
+        const delCharge = parseFloat(document.getElementById('cust-del-charge').value) || 0;
+        const stitchCharge = parseFloat(document.getElementById('cust-stitch-charge').value) || 0;
+
+        // Hint for advance minus material cost
+        const remAdvance = advance - matCost;
+        document.getElementById('advance-hint').innerText = `അഡ്വാൻസ് - മെറ്റീരിയൽ കോസ്റ്റ്: ₹${remAdvance}`;
+
+        // Total Expenses = Stitching + Material + Delivery
+        const totalExpenses = stitchCharge + matCost + delCharge;
+        const remainingAmount = price - totalExpenses;
+
+        let ownerShare = 0;
+        let bizProfit = 0;
+
+        if (remainingAmount > 0) {
+            if (remainingAmount >= 300) {
+                ownerShare = 300;
+                bizProfit = remainingAmount - 300;
+            } else {
+                ownerShare = remainingAmount;
+                bizProfit = 0;
+            }
+        }
+
+        document.getElementById('calc-owner-share').innerText = `₹${ownerShare}`;
+        document.getElementById('calc-biz-profit').innerText = `₹${bizProfit}`;
+    }
+
+    function saveOrder(e) {
+        e.preventDefault();
+        const id = document.getElementById('order-edit-id').value || Date.now().toString();
+        const price = parseFloat(document.getElementById('cust-price').value) || 0;
+        const advance = parseFloat(document.getElementById('cust-advance').value) || 0;
+        const matCost = parseFloat(document.getElementById('cust-mat-cost').value) || 0;
+        const delCharge = parseFloat(document.getElementById('cust-del-charge').value) || 0;
+        const stitchCharge = parseFloat(document.getElementById('cust-stitch-charge').value) || 0;
+
+        const totalExpenses = stitchCharge + matCost + delCharge;
+        const remainingAmount = price - totalExpenses;
+        let ownerShare = remainingAmount >= 300 ? 300 : (remainingAmount > 0 ? remainingAmount : 0);
+        let bizProfit = remainingAmount >= 300 ? remainingAmount - 300 : 0;
+
+        const orderData = {
+            id,
+            custName: document.getElementById('cust-name').value,
+            whatsapp: document.getElementById('cust-whatsapp').value,
+            address: document.getElementById('cust-address').value,
+            platform: document.getElementById('cust-platform').value,
+            deliveryDate: document.getElementById('cust-delivery-date').value,
+            itemCode: document.getElementById('cust-item-code').value,
+            dressName: document.getElementById('cust-dress-name').value,
+            price,
+            advance,
+            matCost,
+            delCharge,
+            stitchCharge,
+            employee: document.getElementById('cust-employee').value,
+            measurement: document.getElementById('cust-measurement').value,
+            ownerShare,
+            bizProfit,
+            status: 'pending',
+            date: new Date().toISOString()
+        };
+
+        const index = db.orders.findIndex(o => o.id === id);
+        if(index >= 0) {
+            orderData.status = db.orders[index].status; // retain status
+            db.orders[index] = orderData;
+        } else {
+            db.orders.push(orderData);
+        }
+
+        document.getElementById('order-form').reset();
+        document.getElementById('order-edit-id').value = '';
+        saveData();
+        switchOrderView('pending');
+    }
+
+    function switchOrderView(view) {
+        currentOrderView = view;
+        document.getElementById('order-view-title').innerText = view === 'pending' ? 'പെൻഡിംഗ് ഓർഡറുകൾ' : 'കംപ്ലീറ്റഡ് ഓർഡറുകൾ';
+        renderOrders();
+    }
+
+    function renderOrders() {
+        const container = document.getElementById('orders-list');
+        container.innerHTML = '';
+        
+        let filtered = db.orders.filter(o => o.status === currentOrderView);
+        if(currentOrderView === 'completed') {
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        if(filtered.length === 0) {
+            container.innerHTML = '<p style="font-size: 13px; color: #64748B;">ഓർഡറുകൾ ഒന്നും ലഭ്യമല്ല.</p>';
+            return;
+        }
+
+        filtered.forEach(o => {
+            container.innerHTML += `
+                <div class="card" style="background: var(--gray-light); margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <b class="clickable" onclick="showCustomerDetails('${o.id}')">${o.custName}</b>
+                        <span class="badge badge-${o.platform.toLowerCase()}">${o.platform}</span>
+                    </div>
+                    <p style="font-size: 12px; margin-top: 4px;">ഡ്രസ്സ്: ${o.dressName} (${o.itemCode}) | പ്രൈസ്: ₹${o.price}</p>
+                    <p style="font-size: 12px;">ഡെലിവറി: ${o.deliveryDate} | എംപ്ലോയി: ${o.employee}</p>
+                    <p style="font-size: 11px; color: #059669;">പ്രോഫിറ്റ്: ₹${o.bizProfit} | ഓണർ ഷെയർ: ₹${o.ownerShare}</p>
+                    <div style="margin-top: 8px; display: flex; gap: 5px;">
+                        ${o.status === 'pending' ? `<button class="btn" style="padding: 4px 8px; font-size: 11px; background: #059669;" onclick="markCompleted('${o.id}')">കംപ്ലീറ്റ് ചെയ്യുക</button>` : ''}
+                        <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="editOrder('${o.id}')">Edit</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteOrder('${o.id}')">Del</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function markCompleted(id) {
+        const order = db.orders.find(o => o.id === id);
+        if(order) {
+            order.status = 'completed';
+            saveData();
+        }
+    }
+
+    function editOrder(id) {
+        const o = db.orders.find(item => item.id === id);
+        if(!o) return;
+        switchTab('customers');
+        document.getElementById('order-edit-id').value = o.id;
+        document.getElementById('cust-name').value = o.custName;
+        document.getElementById('cust-whatsapp').value = o.whatsapp;
+        document.getElementById('cust-address').value = o.address;
+        document.getElementById('cust-platform').value = o.platform;
+        document.getElementById('cust-delivery-date').value = o.deliveryDate;
+        document.getElementById('cust-item-code').value = o.itemCode;
+        document.getElementById('cust-dress-name').value = o.dressName;
+        document.getElementById('cust-price').value = o.price;
+        document.getElementById('cust-advance').value = o.advance;
+        document.getElementById('cust-mat-cost').value = o.matCost;
+        document.getElementById('cust-del-charge').value = o.delCharge;
+        document.getElementById('cust-stitch-charge').value = o.stitchCharge;
+        document.getElementById('cust-employee').value = o.employee;
+        document.getElementById('cust-measurement').value = o.measurement;
+        calculateFinances();
+    }
+
+    function deleteOrder(id) {
+        db.orders = db.orders.filter(o => o.id !== id);
+        saveData();
+    }
+
+    function showCustomerDetails(id) {
+        const o = db.orders.find(item => item.id === id);
+        if(!o) return;
+        const custAllOrders = db.orders.filter(item => item.custName === o.custName);
+        const totalRev = custAllOrders.reduce((sum, item) => sum + item.price, 0);
+        const totalProf = custAllOrders.reduce((sum, item) => sum + item.bizProfit, 0);
+
+        alert(`കസ്റ്റമർ വിവരങ്ങൾ:\n\nപേര്: ${o.custName}\nവാട്സാപ്പ്: ${o.whatsapp}\nആകെ ഓർഡറുകൾ: ${custAllOrders.length}\nആകെ നൽകിയ റെവന്യൂ: ₹${totalRev}\nആകെ നൽകിയ പ്രോഫിറ്റ്: ₹${totalProf}\nഅഡ്രസ്സ്: ${o.address}`);
+    }
+
+    // --- DASHBOARD & METRICS ---
+    function updateDashboard() {
+        let totalRev = 0, totalProf = 0;
+        let lediRev = 0, lediProf = 0, lediComp = 0, lediPend = 0;
+        let bebiRev = 0, bebiProf = 0, bebiComp = 0, bebiPend = 0;
+        let ownerEarn = 0;
+
+        db.orders.forEach(o => {
+            totalRev += o.price;
+            totalProf += o.bizProfit;
+            ownerEarn += o.ownerShare;
+
+            if(o.platform === 'LEDI') {
+                lediRev += o.price;
+                lediProf += o.bizProfit;
+                if(o.status === 'completed') lediComp++; else lediPend++;
+            } else {
+                bebiRev += o.price;
+                bebiProf += o.bizProfit;
+                if(o.status === 'completed') bebiComp++; else bebiPend++;
+            }
+        });
+
+        document.getElementById('dash-total-rev').innerText = `₹${totalRev}`;
+        document.getElementById('dash-total-prof').innerText = `₹${totalProf}`;
+        document.getElementById('dash-ledi-stats').innerText = `₹${lediRev} / ₹${lediProf}`;
+        document.getElementById('dash-bebi-stats').innerText = `₹${bebiRev} / ₹${bebiProf}`;
+        document.getElementById('dash-owner-earn').innerText = `₹${ownerEarn}`;
+        document.getElementById('dash-owner-orders').innerText = `ആകെ ലഭിച്ച ഓർഡറുകൾ: ${db.orders.length}`;
+        document.getElementById('dash-comp-orders').innerText = db.orders.filter(o => o.status === 'completed').length;
+        document.getElementById('dash-pend-orders').innerText = db.orders.filter(o => o.status === 'pending').length;
+        document.getElementById('dash-ledi-ord').innerText = `${lediComp} / ${lediPend}`;
+        document.getElementById('dash-bebi-ord').innerText = `${bebiComp} / ${bebiPend}`;
+
+        // Next Deliveries (Top 2 pending based on date)
+        const pendingOrders = db.orders.filter(o => o.status === 'pending').sort((a,b) => new Date(a.deliveryDate) - new Date(b.deliveryDate));
+        const nextList = document.getElementById('next-deliveries-list');
+        nextList.innerHTML = '';
+        if(pendingOrders.length === 0) {
+            nextList.innerHTML = '<p style="color: #64748B;">ഡെലിവറികൾ ഒന്നും ബാക്കിയില്ല.</p>';
+        } else {
+            pendingOrders.slice(0, 2).forEach(o => {
+                nextList.innerHTML += `<div class="clickable" onclick="showCustomerDetails('${o.id}')" style="margin-bottom: 5px;">👉 <b>${o.custName}</b> - ഡെലിവറി: ${o.deliveryDate} (${o.dressName})</div>`;
+            });
+        }
+    }
+
+    function populateDropdowns() {
+        const empSelect = document.getElementById('cust-employee');
+        empSelect.innerHTML = '';
+        db.employees.forEach(e => {
+            empSelect.innerHTML += `<option value="${e.name}">${e.name}</option>`;
+        });
+
+        const itemSelect = document.getElementById('cust-item-code');
+        itemSelect.innerHTML = '<option value="">ഐറ്റം തിരഞ്ഞെടുക്കുക</option>';
+        db.items.forEach(i => {
+            itemSelect.innerHTML += `<option value="${i.code}">${i.code} - ${i.name}</option>`;
+        });
+    }
+
+    // --- ANALYTICS CHART ---
+    function initChart() {
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        if(analyticsChartInstance) analyticsChartInstance.destroy();
+
+        let totalRev = db.orders.reduce((s, o) => s + o.price, 0);
+        let totalProf = db.orders.reduce((s, o) => s + o.bizProfit, 0);
+        let totalExp = db.orders.reduce((s, o) => s + (o.matCost + o.delCharge + o.stitchCharge), 0);
+
+        analyticsChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Revenue', 'Profit', 'Expenses'],
+                datasets: [{
+                    label: 'Amount (₹)',
+                    data: [totalRev, totalProf, totalExp],
+                    backgroundColor: ['#1E3A8A', '#7C3AED', '#EF4444']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function updateAnalytics() {
+        initChart();
+    }
+
+    // Initial setup
+    window.onload = function() {
+        saveData();
+    };
+</script>
+
+</body>
+</html>
